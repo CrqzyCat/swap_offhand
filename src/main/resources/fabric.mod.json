@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "swap_offhand",
+  "version": "${version}",
+  "name": "swap_offhand",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/swap_offhand/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "me.sawp_offhand.swap_offhand.client.Swap_offhandDataGenerator"
+    ],
+    "client": [
+      "me.sawp_offhand.swap_offhand.client.Swap_offhandClient"
+    ],
+    "main": [
+      "me.sawp_offhand.swap_offhand.Swap_offhand"
+    ]
+  },
+  "mixins": [
+    "swap_offhand.mixins.json",
+    {
+      "config": "swap_offhand.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
