@@ -34,7 +34,6 @@ public class Swap_offhandClient implements ClientModInitializer {
                 int bestSlot = -1;
 
                 if (offhandStack.isOf(Items.TOTEM_OF_UNDYING)) {
-                    // Wir halten ein Totem -> Suche das beste Schild
                     ItemStack bestShield = null;
                     for (int i = 0; i < 36; i++) {
                         ItemStack current = client.player.getInventory().getStack(i);
@@ -46,7 +45,6 @@ public class Swap_offhandClient implements ClientModInitializer {
                         }
                     }
                 } else {
-                    // Wir halten ein Schild (oder nichts) -> Suche ein Totem
                     for (int i = 0; i < 36; i++) {
                         if (client.player.getInventory().getStack(i).isOf(Items.TOTEM_OF_UNDYING)) {
                             bestSlot = i;
@@ -56,26 +54,24 @@ public class Swap_offhandClient implements ClientModInitializer {
                 }
 
                 if (bestSlot != -1) {
+                    // SERVER-FIX: Slots über 9 (Inventar) müssen für clickSlot angepasst werden
+                    int serverSlot = bestSlot;
                     if (bestSlot < 9) {
+                        // HOTBAR-LOGIK (Paket-Methode ist hier am sichersten)
                         int originalSlot = client.player.getInventory().getSelectedSlot();
                         client.player.getInventory().setSelectedSlot(bestSlot);
-
                         client.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
                                 PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
-                                BlockPos.ORIGIN,
-                                Direction.DOWN
-                        ));
-
+                                BlockPos.ORIGIN, Direction.DOWN));
                         client.player.getInventory().setSelectedSlot(originalSlot);
                     } else {
-                        int syncId = client.player.currentScreenHandler.syncId;
-                        client.interactionManager.clickSlot(
-                                syncId,
-                                bestSlot,
-                                40,
-                                SlotActionType.SWAP,
-                                client.player
-                        );
+                        // INVENTAR-LOGIK (Verbesserter Click-Flow)
+                        // Erst Item aufnehmen
+                        client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, serverSlot, 0, SlotActionType.PICKUP, client.player);
+                        // Dann in Offhand ablegen (Slot 45 bei den meisten Server-Mappings für PlayerContainer)
+                        client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, 45, 0, SlotActionType.PICKUP, client.player);
+                        // Falls noch was in der Offhand war, das alte Item zurück in den ursprünglichen Slot legen
+                        client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, serverSlot, 0, SlotActionType.PICKUP, client.player);
                     }
                 }
             }
