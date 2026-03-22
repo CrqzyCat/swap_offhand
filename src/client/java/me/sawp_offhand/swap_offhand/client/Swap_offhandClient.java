@@ -54,10 +54,10 @@ public class Swap_offhandClient implements ClientModInitializer {
                 }
 
                 if (bestSlot != -1) {
-                    // SERVER-FIX: Slots über 9 (Inventar) müssen für clickSlot angepasst werden
+                    // SERVER-FIX: Slots above 9 (inventory) must be adjusted for clickSlot
                     int serverSlot = bestSlot;
                     if (bestSlot < 9) {
-                        // HOTBAR-LOGIK (Paket-Methode ist hier am sichersten)
+                        // HOTBAR-LOGIC (Packet method is safest here)
                         int originalSlot = client.player.getInventory().getSelectedSlot();
                         client.player.getInventory().setSelectedSlot(bestSlot);
                         client.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
@@ -65,12 +65,12 @@ public class Swap_offhandClient implements ClientModInitializer {
                                 BlockPos.ORIGIN, Direction.DOWN));
                         client.player.getInventory().setSelectedSlot(originalSlot);
                     } else {
-                        // INVENTAR-LOGIK (Verbesserter Click-Flow)
-                        // Erst Item aufnehmen
+                        // INVENTORY-LOGIC (Improved click flow)
+                        // First, pick up the item
                         client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, serverSlot, 0, SlotActionType.PICKUP, client.player);
-                        // Dann in Offhand ablegen (Slot 45 bei den meisten Server-Mappings für PlayerContainer)
+                        // Then, place it in the offhand (Slot 45 in most server mappings for PlayerContainer)
                         client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, 45, 0, SlotActionType.PICKUP, client.player);
-                        // Falls noch was in der Offhand war, das alte Item zurück in den ursprünglichen Slot legen
+                        // If there was something in the offhand, put the old item back into the original slot
                         client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, serverSlot, 0, SlotActionType.PICKUP, client.player);
                     }
                 }
